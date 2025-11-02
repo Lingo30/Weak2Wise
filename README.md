@@ -7,24 +7,24 @@ Recent advances in large language model (LLM) fine‐tuning have shown that trai
 
 ## Project Structure
 
-- `config.yaml`                # Centralized configuration for models, endpoints, prompts, paths, and hyperparameters
-- `run_pipeline.py`            # Main entry point that executes all five steps sequentially
-- `step1_filter.py`            # Step 1: Filter out samples already correctly answered by the weak LLM
-- `step2_generate.py`          # Step 2: Generate diverse candidate reasoning traces using strong LLMs
-- `step3_stepmask.py`          # Step 3: Score reasoning traces using the Step-Mask evaluation protocol
-- `step4_select_truncate.py`   # Step 4: Select the highest-scoring trace and truncate it to the first correct derivation
-- `step5_prepare_finetune.py`  # Step 5: Format selected traces into SFT-ready {"prompt", "response"} pairs
-- `llm_client.py`              # Unified client supporting both OpenAI-compatible APIs and local Transformers models
-- `utils.py`                   # Utility functions for I/O, text normalization, step extraction, and token counting
+- `config.yaml`  Centralized configuration for models, endpoints, prompts, paths, and hyperparameters
+- `run_pipeline.py`  Main entry point that executes all five steps sequentially
+- `step1_filter.py`  Step 1: Filter out samples already correctly answered by the weak LLM
+- `step2_generate.py`  Step 2: Generate diverse candidate reasoning traces using strong LLMs
+- `step3_stepmask.py`  Step 3: Score reasoning traces using the Step-Mask evaluation protocol
+- `step4_select_truncate.py`  Step 4: Select the highest-scoring trace and truncate it to the first correct derivation
+- `step5_prepare_finetune.py`  Step 5: Format selected traces into SFT-ready {"prompt", "response"} pairs
+- `llm_client.py`  Unified client supporting both OpenAI-compatible APIs and local Transformers models
+- `utils.py`  Utility functions for I/O, text normalization, step extraction, and token counting
 - `data/`
-  - `qa_input.jsonl`           # Input QA dataset (user-provided)
-  - `work/`                    # Intermediate outputs from each step:
+  - `qa_input.jsonl`  Input QA dataset (user-provided)
+  - `work/`  Intermediate outputs from each step:
       - `s_prime.jsonl`
       - `candidates.jsonl`
       - `scored_candidates.jsonl`
       - `selected_truncated.jsonl`
-  - `gr1k_finetune.jsonl`      # Final fine-tuning dataset (GR-1K), ready for SFT
-- `requirements.txt`           # Python dependencies
+  - `gr1k_finetune.jsonl`  Final fine-tuning dataset (GR-1K), ready for SFT
+- `requirements.txt`  Python dependencies
 
 ## Quick start
 1. Create and activate a Python virtual environment:
@@ -32,34 +32,23 @@ Recent advances in large language model (LLM) fine‐tuning have shown that trai
    conda create -n weak2wise python=3.10
    conda activate weak2wise
    pip install -r requirements.txt
-
 2. Set environment variables for API keys:
     ```bash
     export DEEPSEEK_API_KEY="sk-..."
     export DASHSCOPE_API_KEY="sk-..."
-
 3. Update `config.yaml` if necessary (model_name, device, paths).
-
 4. Prepare the input QA file `data/qa_input.jsonl` with lines like:
     ```json
     {"question": "What is 2+2?", "answer": "4"}
-
 5. Run the pipeline:
     ```bash
     python run_pipeline.py
-
 6. Outputs:
-
     - Intermediate files in `data/work/`:
-
       - `s_prime.jsonl`
-
       - `candidates.jsonl`
-
       - `scored_candidates.jsonl`
-
       - `selected_truncated.jsonl`
-
     - Final fine-tuning data: `data/gr1k_finetune.jsonl` (or `config.dataset.finetune_out`)
 
 > Note that the pipeline involves a large number of LLM inference calls and is not optimized for efficiency. For practical use or large-scale data synthesis, we strongly recommend replacing the API calls in the code with high-throughput LLM inference services from major cloud platforms (e.g. Alibaba Cloud, etc).
@@ -85,4 +74,3 @@ If you find our paper useful, kindly cite:
     ISBN = "979-8-89176-335-7"
 }
 ```
-
