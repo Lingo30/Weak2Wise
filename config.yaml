@@ -1,0 +1,97 @@
+# config.yaml - all configurable items (models, endpoints, prompts, hyperparameters, dataset paths)
+models:
+  mweak: "Qwen2.5-7B"
+
+  # mstrong list uses endpoint keys (must match keys in model_endpoints)
+  mstrong:
+    - "deepseek-r1"
+    - "qwq-plus"
+
+  # judge and truncation now set to deepseek-v3
+  judge: "deepseek-v3"
+  truncation: "deepseek-v3"
+
+# endpoints configuration: type: "openai" or "transformers"
+model_endpoints:
+  deepseek-r1:
+    type: "openai"
+    model_id: "deepseek-reasoner"
+    base_url: "https://api.deepseek.com"
+    api_key_env: "DEEPSEEK_API_KEY"
+
+  qwq-plus:
+    type: "openai"
+    model_id: "qwq-plus"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key_env: "DASHSCOPE_API_KEY"
+
+  # judge/truncation endpoint using deepseek-v3
+  deepseek-v3:
+    type: "openai"
+    model_id: "deepseek-chat"
+    base_url: "https://api.deepseek.com"
+    api_key_env: "DEEPSEEK_API_KEY"
+
+  # local transformers-based endpoint for Qwen (m_weak)
+  Qwen2.5-7B:
+    type: "transformers"
+    model_name: "Qwen/Qwen2.5-7B"
+    device: "cuda"
+    tokenizer_kwargs: {}
+    generation_kwargs:
+      max_new_tokens: 8192
+      do_sample: False
+      temperature: 0.6
+
+params:
+  skip_filter: False
+  samples_per_model: 3
+  gen_temperature: 0.6
+  n_mask: 6
+  beta: 0.5
+  majority: 1
+  judge_temperature: 0.1
+  trunc_temp: 0.1
+
+dataset:
+  input_path: "data/qa_input.jsonl"
+  work_dir: "data/work"
+  finetune_out: "data/gr1k_finetune.jsonl"
+
+prompts:
+  cgen: "Please reason step by step. Before every step, output a subtitle beginning with '##'. The subtitle of the last step must be '## Final Answer'."
+
+  pqr: |
+    ## Problem
+    {question}
+
+    ## Hint
+    {step_reasoning}
+
+    Please reason step by step, and put your final answer within \boxed{{}}.
+
+  pjudge: |
+    You are an AI evaluator. The user will provide a question, an attempt, and the correct answer.
+
+    Your task is to compare the attempt with the provided correct answer and determine whether it is correct. If the correct answer is a clear numerical value or a multiple-choice option, there must be no ambiguity. If the correct answer requires a full reasoning process, assess whether the attempt is valid, using the correct answer as a reference if necessary.
+
+    Input format:
+    ## Question
+    {question}
+    ## Attempt
+    {attempt}
+    ## Correct Answer
+    {answer}
+
+    Explain your evaluation step by step, and finish your response on a new line with only "Yes" or "No".
+
+  ptrunc: |
+    You are a helpful assistant skilled at simplifying reasoning processes. The user will provide a reasoning process and the correct answer for a question. There may be backtracking that often starts with the word 'wait'.
+
+    Task: extract the reasoning process from the beginning until the correct answer is FIRST deduced. Do not modify content. Output only the extracted reasoning portion.
+
+    Input format:
+    ## Reasoning Process
+    {normal_reasoning}
+    ## Correct Answer
+    {answer}

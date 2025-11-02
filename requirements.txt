@@ -1,0 +1,7 @@
+pyyaml
+tqdm
+python-dotenv
+openai
+transformers>=4.30.0
+accelerate
+torch
